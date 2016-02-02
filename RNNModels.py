@@ -25,3 +25,46 @@ def one_lstm_step(x_t, h_tm1, c_tm1, W_xi, W_hi, W_ci, b_i, W_xf, W_hf, W_cf, b_
     y_t = sigma(theano.dot(h_t, W_hy) + b_y)
     return [h_t, c_t, y_t]
 
+#TODO: Use a more appropriate initialization method
+def sample_weights(sizeX, sizeY):
+    values = np.ndarray([sizeX, sizeY], dtype=dtype)
+    for dx in xrange(sizeX):
+        vals = np.random.uniform(low=-1., high=1.,  size=(sizeY,))
+        #vals_norm = np.sqrt((vals**2).sum())
+        #vals = vals / vals_norm
+        values[dx,:] = vals
+    _,svs,_ = np.linalg.svd(values)
+    #svs[0] is the largest singular value
+    values = values / svs[0]
+    return values
+
+def initialize_weights(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
+    # initialize weights
+    # i_t and o_t should be "open" or "closed"
+    # f_t should be "open" (don't forget at the beginning of training)
+    # we try to archive this by appropriate initialization of the corresponding biases
+
+    W_xi = theano.shared(sample_weights(n_in, n_i))
+    W_hi = theano.shared(sample_weights(n_hidden, n_i))
+    W_ci = theano.shared(sample_weights(n_c, n_i))
+    b_i = theano.shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_i)))
+    W_xf = theano.shared(sample_weights(n_in, n_f))
+    W_hf = theano.shared(sample_weights(n_hidden, n_f))
+    W_cf = theano.shared(sample_weights(n_c, n_f))
+    b_f = theano.shared(np.cast[dtype](np.random.uniform(0, 1.,size = n_f)))
+    W_xc = theano.shared(sample_weights(n_in, n_c))
+    W_hc = theano.shared(sample_weights(n_hidden, n_c))
+    b_c = theano.shared(np.zeros(n_c, dtype=dtype))
+    W_xo = theano.shared(sample_weights(n_in, n_o))
+    W_ho = theano.shared(sample_weights(n_hidden, n_o))
+    W_co = theano.shared(sample_weights(n_c, n_o))
+    b_o = theano.shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_o)))
+    W_hy = theano.shared(sample_weights(n_hidden, n_y))
+    b_y = theano.shared(np.zeros(n_y, dtype=dtype))
+
+    c0 = theano.shared(np.zeros(n_hidden, dtype=dtype))
+    #h0 = T.tanh(c0)
+
+    params = [W_xi, W_hi, W_ci, b_i, W_xf, W_hf, W_cf, b_f, W_xc, W_hc, b_c, W_xo, W_ho, W_co, b_o, W_hy, b_y, c0]
+    return params
+
