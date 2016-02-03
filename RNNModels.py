@@ -38,7 +38,7 @@ def sample_weights(sizeX, sizeY):
     values = values / svs[0]
     return values
 
-def initialize_weights(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
+def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
     # initialize weights
     # i_t and o_t should be "open" or "closed"
     # f_t should be "open" (don't forget at the beginning of training)
@@ -63,8 +63,42 @@ def initialize_weights(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
     b_y = theano.shared(np.zeros(n_y, dtype=dtype))
 
     c0 = theano.shared(np.zeros(n_hidden, dtype=dtype))
-    #h0 = T.tanh(c0)
+    h0 = T.tanh(c0)
 
     params = [W_xi, W_hi, W_ci, b_i, W_xf, W_hf, W_cf, b_f, W_xc, W_hc, b_c, W_xo, W_ho, W_co, b_o, W_hy, b_y, c0]
-    return params
 
+    #input
+    v = T.matrix(dtype=dtype)
+
+    # target
+    target = T.matrix(dtype=dtype)
+
+    # hidden and outputs of the entire sequence
+    [h_vals, _, y_vals], _ = theano.scan(fn=one_lstm_step,
+                                         sequences = dict(input=v, taps=[0]),
+                                         outputs_info = [h0, c0, None ], # corresponds to return type of fn
+                                         non_sequences = [W_xi, W_hi, W_ci, b_i, W_xf, W_hf, W_cf, b_f, W_xc, W_hc,
+                                                          b_c, W_xo, W_ho, W_co, b_o, W_hy, b_y] )
+
+    # cost function
+    cost = -T.mean(target * T.log(y_vals)+ (1.- target) * T.log(1. - y_vals))
+
+    # learning rate
+    lr = np.cast[dtype](.1)
+    learning_rate = theano.shared(lr)
+
+    # calculating gradients
+    gparams = []
+    for param in params:
+      gparam = T.grad(cost, param)
+      gparams.append(gparam)
+
+    updates=[]
+    for param, gparam in zip(params, gparams):
+        updates.append((param, param - gparam * learning_rate))
+
+    learn_rnn_fn = theano.function(inputs = [v, target],
+                                   outputs = cost,
+                                   updates = updates)
+
+    return learn_rnn_fn
