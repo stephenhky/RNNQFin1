@@ -81,7 +81,8 @@ def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
                                                           b_c, W_xo, W_ho, W_co, b_o, W_hy, b_y] )
 
     # cost function
-    cost = -T.mean(target * T.log(y_vals)+ (1.- target) * T.log(1. - y_vals))
+    # cost = -T.mean(target * T.log(y_vals)+ (1.- target) * T.log(1. - y_vals))
+    cost = - T.mean((target-y_vals)*(target-y_vals))
 
     # learning rate
     lr = np.cast[dtype](.1)
@@ -102,3 +103,4 @@ def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
                                    updates = updates)
 
     return learn_rnn_fn
+
