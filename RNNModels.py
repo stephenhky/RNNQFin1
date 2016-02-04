@@ -38,7 +38,7 @@ def sample_weights(sizeX, sizeY):
     values = values / svs[0]
     return values
 
-def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
+def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y, updates):
     # initialize weights
     # i_t and o_t should be "open" or "closed"
     # f_t should be "open" (don't forget at the beginning of training)
@@ -98,9 +98,11 @@ def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
     for param, gparam in zip(params, gparams):
         updates.append((param, param - gparam * learning_rate))
 
-    learn_rnn_fn = theano.function(inputs = [v, target],
-                                   outputs = cost,
-                                   updates = updates)
+    learn_rnn_fn = theano.function(inputs = [v, target], outputs = cost, updates = updates)
+    prediction_fc = theano.function(inputs = [v], outputs = y_vals)
 
-    return learn_rnn_fn
+    return learn_rnn_fn, prediction_fc
 
+def train(input, output, learn_fcn, numtimes=1000):
+    error = [learn_fcn(np.matrix(input), np.marix(output)) for count in range(numtimes)]
+    return error
