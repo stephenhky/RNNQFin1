@@ -91,8 +91,8 @@ def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y, updates):
     # calculating gradients
     gparams = []
     for param in params:
-      gparam = T.grad(cost, param)
-      gparams.append(gparam)
+        gparam = T.grad(cost, param)
+        gparams.append(gparam)
 
     updates=[]
     for param, gparam in zip(params, gparams):
