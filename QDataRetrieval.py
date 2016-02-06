@@ -16,3 +16,6 @@ class QuanDLRetriever:
 
     def getclose(self):
         return np.array(self.data['Close'])
+
+    def numdatapts(self):
+        return self.data.size
