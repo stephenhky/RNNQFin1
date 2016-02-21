@@ -38,7 +38,7 @@ def sample_weights(sizeX, sizeY):
     values = values / svs[0]
     return values
 
-def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y, updates):
+def lstm_costfcn(n_in, n_hidden, n_i, n_c, n_o, n_f, n_y):
     # initialize weights
     # i_t and o_t should be "open" or "closed"
     # f_t should be "open" (don't forget at the beginning of training)
