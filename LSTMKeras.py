@@ -1,24 +1,27 @@
 import numpy as np
-from keras.layers.recurrent import LSTM
-
-def train_kerasLSTM(input, output, timesteps):
-    pass
-
-# example from http://keras.io/examples/
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
 from keras.layers import LSTM
 
-model = Sequential()
-model.add(Embedding(max_features, 256, input_length=maxlen))
-model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid'))
-model.add(Dropout(0.5))
-model.add(Dense(1))
-model.add(Activation('sigmoid'))
+# example from http://keras.io/examples/
 
-model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+def train_kerasLSTM(X_train, Y_train, timesteps=10):
+    model = Sequential()
+    model.add(Embedding(1, 256, input_length=1))
+    model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
 
-model.fit(X_train, Y_train, batch_size=16, nb_epoch=10)
-score = model.evaluate(X_test, Y_test, batch_size=16)
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+
+    model.fit(X_train, Y_train, batch_size=16, nb_epoch=timesteps)
+
+    return model
+
+
+
+
+#score = model.evaluate(X_test, Y_test, batch_size=16)
