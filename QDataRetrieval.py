@@ -8,11 +8,10 @@ class QuanDLRetriever:
     def __init__(self, code='YAHOO/INDEX_GSPC'):
         self.data = Quandl.get(code)
 
-    def getdate(self, format='sec'):
-        if format.lower() == 'sec':
-            return np.array(self.data.index)-reference_timept
-        else:
-            return np.array(self.data.index)
+    def getseconds(self):
+        delta_t = np.array(self.data.index)-reference_timept
+        delta_t = np.array(map(lambda t: t.item()/1e+9, delta_t))
+        return delta_t
 
     def getclose(self):
         return np.array(self.data['Close'])
