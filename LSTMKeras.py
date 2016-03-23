@@ -9,8 +9,9 @@ from keras.preprocessing import sequence
 # example from http://keras.io/examples/
 # example 2: https://github.com/fchollet/keras/blob/master/examples/imdb_lstm.py
 
-def train_kerasLSTM(X_train, Y_train, timesteps=10, max_features=1, max_len=1):
+def train_kerasLSTM(X_train, Y_train, timesteps=10, max_len=1):
     # X_train = sequence.pad_sequences(X_train, maxlen=max_len)
+    max_features = X_train.shape[0]
     model = Sequential()
     model.add(Embedding(max_features, 256, input_length=max_len))
     model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid'))
