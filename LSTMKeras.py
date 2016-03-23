@@ -4,7 +4,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
 from keras.layers import LSTM
-from keras.preprocessing import sequence
+from keras.models import model_from_json
 
 # example from http://keras.io/examples/
 # example 2: https://github.com/fchollet/keras/blob/master/examples/imdb_lstm.py
@@ -25,7 +25,15 @@ def train_kerasLSTM(X_train, Y_train, timesteps=10, max_len=1):
 
     return model
 
+def save_model(nameprefix, model):
+    model_json = model.to_json()
+    open(nameprefix+'.json', 'wb').write(model_json)
+    model.save_weights(nameprefix+'.h5')
 
+def load_model(nameprefix):
+    model = model_from_json(open(nameprefix+'.json', 'rb').read())
+    model.load_weights(nameprefix+'.h5')
+    return model
 
 
 #score = model.evaluate(X_test, Y_test, batch_size=16)
