@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow.models.rnn import rnn_cell
 
+from nltk.corpus import brown
+
 batch_size = 100
 num_steps = 10
 lstm_size = 100
@@ -20,4 +22,16 @@ for i in range(len(num_steps)):
     # ...
 
 final_state = state
+
+
+
+# A numpy array holding the state of LSTM after each batch of words.
+numpy_state = initial_state.eval()
+total_loss = 0.0
+for fileid in brown.filesid():
+    current_batch_of_words = brown.words()
+    numpy_state, current_loss = tf.session.run([final_state, loss],
+                                                feed_dict={initial_state: numpy_state, words: current_batch_of_words})
+    total_loss += current_loss
+
 
