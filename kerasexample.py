@@ -23,10 +23,13 @@ from keras.models import model_from_json
 
 import argparse
 
+import pandas as pd
+
 def argparser():
     parser = argparse.ArgumentParser(description='LSTM Keras example')
     parser.add_argument('modelprefix', help='path of model prefix')
     parser.add_argument('--toload', action='store_true', help='load model instead of train')
+    parser.add_argument('--testoutput', default='', help='test output data')
     return parser
 
 def save_model(nameprefix, model):
@@ -43,23 +46,24 @@ def load_model(nameprefix):
 parser = argparser()
 args = parser.parse_args()
 
+
+max_features = 20000
+maxlen = 80  # cut texts after this number of words (among top max_features most common words)
+batch_size = 32
+
+print('Loading data...')
+(X_train, y_train), (X_test, y_test) = imdb.load_data(nb_words=max_features,
+                                                      test_split=0.2)
+print(len(X_train), 'train sequences')
+print(len(X_test), 'test sequences')
+
+print('Pad sequences (samples x time)')
+X_train = sequence.pad_sequences(X_train, maxlen=maxlen)
+X_test = sequence.pad_sequences(X_test, maxlen=maxlen)
+print('X_train shape:', X_train.shape)
+print('X_test shape:', X_test.shape)
+
 if not args.toload:
-    max_features = 20000
-    maxlen = 80  # cut texts after this number of words (among top max_features most common words)
-    batch_size = 32
-
-    print('Loading data...')
-    (X_train, y_train), (X_test, y_test) = imdb.load_data(nb_words=max_features,
-                                                          test_split=0.2)
-    print(len(X_train), 'train sequences')
-    print(len(X_test), 'test sequences')
-
-    print('Pad sequences (samples x time)')
-    X_train = sequence.pad_sequences(X_train, maxlen=maxlen)
-    X_test = sequence.pad_sequences(X_test, maxlen=maxlen)
-    print('X_train shape:', X_train.shape)
-    print('X_test shape:', X_test.shape)
-
     print('Build model...')
     model = Sequential()
     model.add(Embedding(max_features, 128, input_length=maxlen, dropout=0.2))
@@ -81,9 +85,21 @@ if not args.toload:
 
     save_model(args.modelprefix, model)
 else:
+    print("Loading model")
     model = load_model(args.modelprefix)
+    model.compile(loss='binary_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
 
 score, acc = model.evaluate(X_test, y_test,
                             batch_size=batch_size)
 print('Test score:', score)
 print('Test accuracy:', acc)
+
+if len(args.testoutput)>0:
+    Y_predicted = model.predict(X_test, batch_size=batch_size)
+    # df = pd.DataFrame({'y_test': y_test,
+    #                    'Y_predicted': Y_predicted})
+    # df.to_csv(args.testoutput, index=False)
+    print(Y_predicted)
+    print(y_test)
