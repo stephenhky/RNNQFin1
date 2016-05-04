@@ -12,21 +12,22 @@ Some configurations won't converge.
 from what you see with CNNs/MLPs/etc.
 '''
 from __future__ import print_function
+
 import numpy as np
+
+from KerasModelIO import save_model, load_model
+
 np.random.seed(1337)  # for reproducibility
 
 from keras.preprocessing import sequence
-from keras.utils import np_utils
 from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation
+from keras.layers.core import Dense, Activation
 from keras.layers.embeddings import Embedding
-from keras.layers.recurrent import LSTM, SimpleRNN, GRU
+from keras.layers.recurrent import LSTM
 from keras.datasets import imdb
-from keras.models import model_from_json
 
 import argparse
 
-import pandas as pd
 
 def argparser():
     parser = argparse.ArgumentParser(description='LSTM Keras example')
@@ -34,16 +35,6 @@ def argparser():
     parser.add_argument('--toload', action='store_true', help='load model instead of train')
     parser.add_argument('--testoutput', default='', help='test output data')
     return parser
-
-def save_model(nameprefix, model):
-    model_json = model.to_json()
-    open(nameprefix+'.json', 'wb').write(model_json)
-    model.save_weights(nameprefix+'.h5')
-
-def load_model(nameprefix):
-    model = model_from_json(open(nameprefix+'.json', 'rb').read())
-    model.load_weights(nameprefix+'.h5')
-    return model
 
 # parse argument
 parser = argparser()
